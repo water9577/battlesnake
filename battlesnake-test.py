@@ -1,6 +1,7 @@
 # 文件名：main.py（Replit部署核心）
 import os
 import torch
+import torch.nn as nn
 import numpy as np
 from flask import Flask, request, jsonify
 
@@ -19,7 +20,7 @@ class PolicyNetwork(nn.Module):
 
 # 初始化模型（加载本地训练的权重）
 model = PolicyNetwork()
-model.load_state_dict(torch.load("ppo_snake_model.pth", map_location=torch.device('cpu')))
+model.load_state_dict(torch.load("ppo_snake_model.pth", map_location=torch.device))
 model.eval()  # 推理模式
 
 # 🔹 2. 状态预处理（复刻PDF的环境特征提取）

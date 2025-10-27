@@ -5,22 +5,24 @@ import torch.nn as nn
 import numpy as np
 from flask import Flask, request, jsonify
 
-# 🔹 1. 加载训练好的PPO模型
 class PolicyNetwork(nn.Module):
     def __init__(self, state_dim=8, action_dim=4):
         super().__init__()
         self.fc1 = nn.Linear(state_dim, 64)
         self.fc2 = nn.Linear(64, 64)
         self.actor = nn.Linear(64, action_dim)
+        self.critic = nn.Linear(64, 1)  # 确保这里有 critic 网络
 
     def forward(self, x):
         x = torch.relu(self.fc1(x))
         x = torch.relu(self.fc2(x))
-        return torch.softmax(self.actor(x), dim=1)
+        action_probs = torch.softmax(self.actor(x), dim=1)
+        state_value = self.critic(x)
+        return action_probs, state_value
 
 # 初始化模型（加载本地训练的权重）
 model = PolicyNetwork()
-model.load_state_dict(torch.load("ppo_snake_model.pth", map_location=torch.device))
+model.load_state_dict(torch.load("ppo_snake_model.pth", map_location=torch.device('cpu')))
 model.eval()  # 推理模式
 
 # 🔹 2. 状态预处理（复刻PDF的环境特征提取）
